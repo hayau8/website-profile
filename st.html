@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profil Użytkownika</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa; /* Jasnoszary tło */
+      }
+      .profile-container {
+        margin-top: 50px;
+      }
+      .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .profile-info {
+        margin-bottom: 20px;
+      }
+      .section-title {
+        margin-top: 20px;
+        border-bottom: 1px solid #dee2e6; /* Linia oddzielająca sekcje */
+        padding-bottom: 10px;
+      }
+      .comment {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: white;
+      }
+      .friend-item,
+      .liked-profile-item {
+        margin-bottom: 5px;
+        padding: 8px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container profile-container">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-body">
+              <div class="profile-header">
+                <img
+                  src="placeholder-avatar.png"
+                  alt="Avatar"
+                  class="rounded-circle"
+                  width="150"
+                  height="150"
+                />
+                <p></p>
+                <h2 id="user-name">Nazwa Użytkownika</h2>
+              </div>
+
+              <div class="profile-info">
+                <p>
+                  <strong>Polubienia:</strong> <span id="likes-count">123</span>
+                </p>
+                <p>
+                  <strong>Dołączył:</strong>
+                  <span id="join-date">2023-10-27</span>
+                </p>
+              </div>
+
+              <div class="section-title">
+                <h3>Komentarze</h3>
+              </div>
+              <div id="comments-section">
+                <div class="comment">
+                  <p><strong>Użytkownik 1:</strong> Świetny profil!</p>
+                </div>
+                <div class="comment">
+                  <p>
+                    <strong>Użytkownik 2:</strong> Bardzo inspirujące treści.
+                  </p>
+                </div>
+              </div>
+
+              <div class="section-title">
+                <h3>Znajomi</h3>
+              </div>
+              <div id="friends-section">
+                <div class="friend-item">Znajomy 1</div>
+                <div class="friend-item">Znajomy 2</div>
+              </div>
+
+              <div class="section-title">
+                <h3>Polubione Profile</h3>
+              </div>
+              <div id="liked-profiles-section">
+                <div class="liked-profile-item">Profil 1</div>
+                <div class="liked-profile-item">Profil 2</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

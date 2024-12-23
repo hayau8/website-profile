@@ -1,0 +1,130 @@
+/* Styl ogólny */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.alerts {
+  position: relative;
+  width: 100%;
+  height: 0px;
+}
+#utworzono-konto,
+#errorRegistration,
+#errorRegistrationEquel,
+#errorUsername {
+  display: none; /* Błedy i komunikat z rejestracji */
+}
+#errorWebsite,
+#errorLoginUser,
+#errorLoginPassword {
+  display: none; /*Komunikaty o błedach logowania */
+}
+
+.createAccountAler,
+.info {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #000000;
+  padding: 10px;
+  color: rgb(217, 255, 0);
+  width: auto;
+  text-align: center;
+  border-radius: 50px;
+  z-index: 1000;
+  font-size: 18px;
+}
+
+.body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000000;
+}
+
+/* Kontener */
+.container {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 25px rgba(191, 243, 3, 0.8);
+  width: 400px;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Pasek z przyciskami */
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  color: black;
+}
+
+.tab-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  font-size: 18px;
+}
+
+.tab-btn.active {
+  font-weight: bold;
+  border-bottom: 2px solid #007bff;
+}
+
+/* Formularze */
+form {
+  display: none;
+}
+
+form.active-form {
+  display: block;
+}
+
+form.hidden-form {
+  display: none;
+}
+
+label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: black;
+  border: none;
+  /* border-radius: 5px; */
+  cursor: pointer;
+}
+button:last-child {
+  border-top-right-radius: 5px;
+}
+button:first-child {
+  border-top-left-radius: 5px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.info {
+  position: fixed;
+}

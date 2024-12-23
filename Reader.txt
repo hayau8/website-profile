@@ -1,0 +1,63 @@
+
+CREATE DATABASE chat_app;
+USE chat_app;
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    room_id INT NOT NULL
+);
+
+
+
+CREATE TABLE rooms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL, -- Opcjonalna nazwa pokoju (np. "Jan-Kasia")
+    user1 VARCHAR(50) NOT NULL, -- Użytkownik 1
+    user2 VARCHAR(50) NOT NULL  -- Użytkownik 2
+);
+
+
+ALTER TABLE messages ADD COLUMN room_id INT NOT NULL;
+
+--------
+
+CREATE DATABASE chat_app2;
+USE chat_app2;
+
+ create table users (
+  userID int not null primary key AUTO_INCREMENT, 
+  username varchar(24), 
+  password varchar(30),
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ 
+
+CREATE TABLE rooms (
+    roomID INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    user1 int NOT NULL,
+    user2 int NOT NULL,
+    FOREIGN KEY (user1) REFERENCES users(userID),
+    FOREIGN KEY (user2) REFERENCES users(userID)
+);
+-- user1 int NOT NULL REFERENCES users(userID)
+
+
+CREATE TABLE messages (
+    messageID INT AUTO_INCREMENT PRIMARY KEY,
+    username int not null REFERENCES users(userID),
+    message TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    room_id INT NOT NULL,
+    FOREIGN KEY (room_id) REFERENCES rooms(roomID)
+);
+
+-- alter table messages add FOREIGN KEY (room_id) REFERENCES rooms(roomID);
+
+
+SELECT user.username message.messageID FROM `message` join user on message.username = user.ID;
+
+jak widać łaczy sie po zdefiniowanym id ale selektem wybiera się co się chce :P
+

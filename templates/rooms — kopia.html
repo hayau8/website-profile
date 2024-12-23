@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokoje</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Zmiana tła i koloru tekstu */
+      body {
+        background-color: #000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+      }
+
+      /* Dodatkowy efekt text-shadow */
+      h1,
+      h3,
+      p,
+      a {
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+      }
+
+      /* Dodatkowy efekt box-shadow dla elementów */
+      .list-group-item,
+      .btn {
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+      }
+
+      .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+      }
+
+      /* Stylizacja linków */
+      a {
+        color: #000000;
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: #ffcc00;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4">Pokoje</h1>
+
+      <p>Witaj, <strong>{{ username }}</strong>!</p>
+
+      <h3 class="mt-4">Twoje pokoje:</h3>
+      <ul class="list-group list-group-flush">
+        {% for room in rooms %}
+        <li class="list-group-item list-group-item-dark">
+          <a href="{{ url_for('room', room_id=room.roomID) }}">
+            Pokój z: {{ room.user1Username if room.user1Username != username
+            else room.user2Username }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <h3 class="mt-4">Utwórz nowy pokój</h3>
+      <form action="{{ url_for('create_new_room') }}" method="POST">
+        <div class="form-group">
+          <label for="user2">Nazwa użytkownika</label>
+          <input
+            type="text"
+            name="user2"
+            id="user2"
+            class="form-control"
+            placeholder="Wprowadź nazwę użytkownika"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Utwórz pokój</button>
+      </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
+<!-- Link do bootstrapa z group list gdzie mozna łatwo sciagnać np ramke na ilosc nowych 
+ wiadomosci w lobby 
+ https://getbootstrap.com/docs/5.3/components/list-group/#basic-example
+  -->

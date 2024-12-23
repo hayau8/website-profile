@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ username }}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  </head>
+  <body class="bg-dark text-white">
+    <div class="container py-5">
+      <!-- Nagłówek Profilu -->
+      <div class="text-center mb-5">
+        <h1 class="display-4" id="username">{{ username }}</h1>
+        <p class="lead">
+          Liczba polubień: <span id="likes" class="text-warning">{{ followNumber }}</span>
+        </p>
+        <p>
+          Utworzono:
+          <span id="creation-time" class="dark">{{ timeCreateProfil }}</span>
+        </p>
+      </div>
+      
+      <div class="row g-4 mt-4 justify-content-center">
+        <!-- Sekcja "O mnie" -->
+        <div class="col-md-10">
+            <div class="card bg-secondary text-white shadow">
+                <div class="card-header">
+                    <h5>O mnie</h5>
+                </div>
+                <div class="card-body">
+                    <p id="about-me">
+                        {{ aboutMe }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+      <div class="row g-4 justify-content-center">
+        <!-- Sekcja Znajomych -->
+        <div class="col-md-5">
+            <div class="card bg-secondary text-white shadow">
+                <div class="card-header">
+                    <h5>Lista Znajomych</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group" id="friends-list">
+                        <!-- Lista znajomych zostanie tutaj dynamicznie wstawiona -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Sekcja Polubionych Profili -->
+        <div class="col-md-5">
+            <div class="card bg-secondary text-white shadow">
+                <div class="card-header">
+                    <h5>Polubione Profile</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group" id="liked-profiles">
+                        <!-- Lista polubionych profili zostanie tutaj dynamicznie wstawiona -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+        <!-- Sekcja Komentarzy -->
+        <div class="row g-4 mt-4 justify-content-center">
+            <!-- Sekcja Komentarzy -->
+            <div class="col-md-10">
+                <div class="card bg-secondary text-white shadow">
+                    <div class="card-header">
+                        <h5>Komentarze</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="comments-section">
+                            <!-- Komentarze zostaną tutaj dynamicznie wstawione -->
+                        </div>
+                        <form id="comment-form" class="mt-3">
+                            <textarea
+                                class="form-control mb-2"
+                                id="new-comment"
+                                rows="2"
+                                placeholder="Dodaj komentarz"
+                            ></textarea>
+                            <button type="submit" class="btn btn-warning w-100">
+                                Dodaj komentarz
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+      // Dane dla przykładu - zostaną pobrane z bazy danych w wersji dynamicznej
+      const userData = {
+        username: "Jan Kowalski",
+        likes: 123,
+        creationTime: "2023-01-01",
+        comments: [
+          { user: "Anna", text: "Świetny profil!" },
+          { user: "Marek", text: "Dzięki za pomoc!" },
+        ],
+        friends: ["Anna", "Marek", "Kasia"],
+        likedProfiles: ["Kamil", "Alicja", "Piotr"],
+      };
+
+      // Wypełnij dane na stronie
+      document.getElementById("username").innerText = userData.username;
+      document.getElementById("likes").innerText = userData.likes;
+      document.getElementById("creation-time").innerText =
+        userData.creationTime;
+
+      // Wypełnij sekcję komentarzy
+      const commentsSection = document.getElementById("comments-section");
+      userData.comments.forEach((comment) => {
+        const commentDiv = document.createElement("div");
+        commentDiv.classList.add("mb-2");
+        commentDiv.innerHTML = `<strong>${comment.user}:</strong> ${comment.text}`;
+        commentsSection.appendChild(commentDiv);
+      });
+
+      // Wypełnij listę znajomych
+      const friendsList = document.getElementById("friends-list");
+      userData.friends.forEach((friend) => {
+        const friendItem = document.createElement("li");
+        friendItem.classList.add("list-group-item", "bg-dark", "text-white");
+        friendItem.innerText = friend;
+        friendsList.appendChild(friendItem);
+      });
+
+      // Wypełnij listę polubionych profili
+      const likedProfiles = document.getElementById("liked-profiles");
+      userData.likedProfiles.forEach((profile) => {
+        const profileItem = document.createElement("li");
+        profileItem.classList.add("list-group-item", "bg-dark", "text-white");
+        profileItem.innerText = profile;
+        likedProfiles.appendChild(profileItem);
+      });
+
+      // Obsługa formularza dodawania komentarza
+      document
+        .getElementById("comment-form")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          const newComment = document
+            .getElementById("new-comment")
+            .value.trim();
+          if (newComment) {
+            const commentDiv = document.createElement("div");
+            commentDiv.classList.add("mb-2");
+            commentDiv.innerHTML = `<strong>${userData.username}:</strong> ${newComment}`;
+            commentsSection.appendChild(commentDiv);
+            document.getElementById("new-comment").value = "";
+          }
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logowanie/Rejestracja</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static',filename='styleLogowanie.css')}}"
+    />
+  </head>
+  <body>
+    <h1 class="info">{{msg}}</h1>
+    <div class="body">
+      <div class="container">
+        <div class="tabs">
+          <button class="tab-btn active" id="login-tab">Logowanie</button>
+          <button class="tab-btn" id="register-tab">Rejestracja</button>
+        </div>
+        <div id="form-content">
+          <!-- Formularz Logowania -->
+          <form
+            id="login-form"
+            class="active-form"
+            action="{{ url_for('login') }}"
+            method="post"
+          >
+            <h2>Logowanie</h2>
+            <label for="username">Nazwa użytkownika:</label>
+            <input type="text" id="username" name="username" required /><br />
+            <label for="password">Hasło:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+            /><br />
+            <button type="submit">Zaloguj się</button>
+          </form>
+
+          <!-- Formularz Rejestracji -->
+          <form
+            id="register-form"
+            class="hidden-form"
+            action="{{ url_for('register') }}"
+            method="post"
+          >
+            <h2>Rejestracja</h2>
+            <label for="username">Nazwa użytkownika:</label>
+            <input type="text" id="username" name="username" required /><br />
+            <!-- <label for="email-register">Email:</label>
+                <input type="email" id="email-register" name="email-register" required><br> -->
+            <label for="password-register">Hasło:</label>
+            <input
+              type="password"
+              id="password-register"
+              name="password-register"
+              required
+            /><br />
+            <label for="password-register-confirmation"
+              >Potwierdzenie hasła:</label
+            >
+            <input
+              type="password"
+              id="password-register-confirmation"
+              name="password-register-confirmation"
+              required
+            /><br />
+            <button type="submit">Zarejestruj się</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static',filename='JSlogowanie.js')}}"></script>
+  </body>
+</html>

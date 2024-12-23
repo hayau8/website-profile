@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokoje</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      /* Zmiana tła i koloru tekstu */
+      body {
+        background-color: #000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+      }
+
+      /* Dodatkowy efekt text-shadow */
+      h1,
+      h3,
+      p,
+      .link_room {
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+      }
+
+      /* Dodatkowy efekt box-shadow dla elementów */
+      .list-group-item,
+      .btn {
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+      }
+
+      .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+      }
+
+      /* Stylizacja linków */
+      .link_room {
+        color: #000000;
+        text-decoration: none;
+      }
+
+      .link_room:hover {
+        color: #ffcc00;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/rooms">Zzz</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNavAltMarkup"
+          aria-controls="navbarNavAltMarkup"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-link active" aria-current="page" href="/"
+              >Strona główna</a
+            >
+            <a class="nav-link" href="/profile">Profil</a>
+            <a class="nav-link" href="/logout">Wyloguj się</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Sekcja dolna -->
+
+    <div class="container mt-5">
+      <h1 class="mb-4">Pokoje</h1>
+
+      <p>Witaj, <strong>{{ username }}</strong>!</p>
+
+      <h3 class="mt-4">Twoje pokoje:</h3>
+      <ul class="list-group list-group-flush">
+        {% for room in rooms %}
+        <li class="list-group-item list-group-item-dark">
+          <a
+            href="{{ url_for('room', room_id=room.roomID) }}"
+            class="link_room"
+          >
+            Pokój z: {{ room.user1Username if room.user1Username != username
+            else room.user2Username }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <h3 class="mt-4">Utwórz nowy pokój</h3>
+      <form action="{{ url_for('create_new_room') }}" method="POST">
+        <div class="form-group position-relative">
+          <label for="user2">Nazwa użytkownika</label>
+          <input
+            type="text"
+            id="user2"
+            name="user2"
+            class="form-control"
+            placeholder="Wprowadź nazwę użytkownika"
+            oninput="showSuggestions()"
+            autocomplete="off"
+            required
+          />
+          <ul
+            id="suggestions"
+            class="list-group position-absolute w-100"
+            style="z-index: 1000; display: none"
+          >
+            <!-- Dynamicznie dodawane sugestie -->
+          </ul>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Utwórz pokój</button>
+      </form>
+    </div>
+    <script>
+      async function showSuggestions() {
+        const query = document.getElementById("user2").value;
+        const suggestionsBox = document.getElementById("suggestions");
+
+        // Jeśli pole jest puste, ukryj listę
+        if (!query.trim()) {
+          suggestionsBox.style.display = "none";
+          suggestionsBox.innerHTML = "";
+          return;
+        }
+
+        // Pobierz dane z backendu
+        const response = await fetch(`/search_users?q=${query}`);
+        const users = await response.json();
+
+        // Wyczyść istniejące sugestie
+        suggestionsBox.innerHTML = "";
+
+        if (users.length === 0) {
+          suggestionsBox.style.display = "none";
+          return;
+        }
+
+        // Dodaj nowe sugestie do listy
+        users.forEach((user) => {
+          const li = document.createElement("li");
+          li.className = "list-group-item list-group-item-action";
+          li.textContent = user.username;
+          li.onclick = () => selectSuggestion(user.username); // Ustaw zdarzenie kliknięcia
+          suggestionsBox.appendChild(li);
+        });
+
+        suggestionsBox.style.display = "block";
+      }
+
+      function selectSuggestion(username) {
+        const input = document.getElementById("user2");
+        const suggestionsBox = document.getElementById("suggestions");
+
+        // Ustaw wybraną nazwę w polu input
+        input.value = username;
+
+        // Ukryj listę
+        suggestionsBox.style.display = "none";
+      }
+    </script>
+    <!-- <form action="{{ url_for('create_new_room') }}" method="POST">
+        <div class="form-group">
+          <label for="user2">Nazwa użytkownika</label>
+          <input
+            type="text"
+            id="user-search"
+            class="form-control"
+            placeholder="Wprowadź nazwę użytkownika"
+            oninput="updateUserOptions()"
+            required
+          />
+
+          <select name="user2" id="user2" class="form-control mt-2" required>
+            <option value="" disabled selected>Wybierz użytkownika</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Utwórz pokój</button>
+      </form>
+    </div>
+    <script>
+      async function updateUserOptions() {
+        const query = document.getElementById("user-search").value;
+
+        // Jeśli nie ma wpisanego tekstu, wyczyść listę
+        if (!query.trim()) {
+          document.getElementById("user2").innerHTML =
+            '<option value="" disabled selected>Wybierz użytkownika</option>';
+          return;
+        }
+
+        // Wykonaj żądanie AJAX do backendu
+        const response = await fetch(`/search_users?q=${query}`);
+        const users = await response.json();
+
+        const userSelect = document.getElementById("user2");
+        userSelect.innerHTML = ""; // Wyczyść aktualne opcje
+
+        if (users.length === 0) {
+          userSelect.innerHTML =
+            '<option value="" disabled selected>Brak wyników</option>';
+          return;
+        }
+
+        // Dodaj opcje na podstawie wyników
+        users.forEach((user) => {
+          const option = document.createElement("option");
+          option.value = user.userID; // ID użytkownika
+          option.textContent = user.username; // Nazwa użytkownika
+          userSelect.appendChild(option);
+        });
+      }
+    </script> -->
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
+
+<!-- Link do bootstrapa z group list gdzie mozna łatwo sciagnać np ramke na ilosc nowych 
+ wiadomosci w lobby 
+ https://getbootstrap.com/docs/5.3/components/list-group/#basic-example
+  -->
