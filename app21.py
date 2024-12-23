@@ -3,7 +3,8 @@ from flask_socketio import SocketIO, emit, join_room
 from datetime import timedelta
 from databaseFunction import (User, Room, Message,Friend,Follow,CommentProfile, db, search_user_table,
                               save_message, fetch_messages_for_room, create_room, fetch_rooms,
-                              search_friend, search_follow, count_follow, count_followers,search_comment)
+                              search_friend, search_follow, count_follow, count_followers,search_comment,search_friend_request,
+                              friends_accept_reject,)
 from sqlalchemy.orm import aliased
 
 app = Flask(__name__)
@@ -124,21 +125,28 @@ def create_new_room():
 
 @app.route('/search_users', methods=['GET'])
 def search_users():
+    if 'username' not in session:
+        return redirect(url_for('index'))
     query = request.args.get('q', '').strip()  # argument q
     if not query:
         return jsonify([])
 
     users = User.query.filter(User.username.ilike(f"%{query}%")).all()
 
-    # Sformatuj dane do JSON
     user_list = [{"userID": user.userID, "username": user.username} for user in users]
     return jsonify(user_list)
 
 @app.route('/profile/<string:profilName>')
-def profile(profilName):
+@app.route("/profile")
+def profile(profilName=None):
     if 'username' not in session:
         return redirect(url_for('index'))
-    user = search_user_table(profilName) # dane uzytkownika profila
+    if profilName is None:
+        user = search_user_table(session["username"])  # dane uzytkownika profila
+    else:
+        user = search_user_table(profilName)  # dane uzytkownika profila
+        if not user:
+            return render_template("404.html")
     user2 = search_user_table(session['username']) # dane uzytkownika sesji
     username = user.username
     followNumber = count_follow(user)
@@ -152,6 +160,7 @@ def profile(profilName):
     # sekcja z sprawdzaniem czy przyjaciel / oczekujacy / nieznajomy
     request_friend = Friend.query.with_entities(Friend.friendStatus).filter(((Friend.friendUser1 == user.userID) & (Friend.friendUser2== user.userID)) | ((Friend.friendUser1==user2.userID) & (Friend.friendUser2==user.userID))).first()
     if request_friend:
+        print(request_friend.friendStatus)
         if request_friend.friendStatus == 0:
             canIMakeFriend = "Dodaj do znajomych"
         elif request_friend.friendStatus == 1:
@@ -160,7 +169,7 @@ def profile(profilName):
             canIMakeFriend = "Oczekujący na akceptacje"
     else:
         canIMakeFriend = "Dodaj do znajomych"
-    return render_template('profile.html',canIMakeFriend=canIMakeFriend,canIfollow=canIfollow,youUsername=session['username'],username=username,followers=followers,followNumber=followNumber,timeCreateProfil=timeCreateProfil,aboutMe=aboutMe,friendList=friendList,followList=followList,commentList=commentList)
+    return render_template('profile.html',canIMakeFriend=canIMakeFriend,canIfollow=canIfollow,youUsername=user2.username,username=username,followers=followers,followNumber=followNumber,timeCreateProfil=timeCreateProfil,aboutMe=aboutMe,friendList=friendList,followList=followList,commentList=commentList)
 
 @app.route('/follow',methods=["POST"])
 def add_folow():
@@ -225,6 +234,27 @@ def comment_profile():
     except Exception as e:
         db.session.rollback()  # Wycofaj zmiany
         return jsonify([False])
+
+@app.route("/friends",methods=["POST","GET"])
+def friends():
+    if "username" not in session:
+        return redirect(url_for("index"))
+    user = search_user_table(session["username"])
+    if request.method=="GET":
+        friendListRequest = search_friend_request(user)
+        return render_template("friends_panel.html",friendListRequest=friendListRequest,user=user)
+    elif request.method == "POST":
+        data = request.get_json()
+        user2 = search_user_table(data.get("user2"))
+        decision = int(data.get("decision"))
+        print(decision)
+        odpowiedz = friends_accept_reject(user,user2,decision)
+        if odpowiedz == False:
+            return jsonify([False],"Bład w zapytaniu")
+        if decision == 0:
+            return jsonify([False,"Nie chce przyjaciela"])
+        elif decision==1:
+            return jsonify([True,"Mam nowego p rzyjaciela"])
 @app.errorhandler(404)
 def app_handle(e):
     return render_template('404.html'),404

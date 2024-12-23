@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zapytania do grona przyjaciół</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static',filename='favicon.ico') }}"
+    />
+    <style>
+      body {
+        background-color: #121212;
+        color: #f8f9fa;
+        font-family: Arial, sans-serif;
+      }
+      .container-lg {
+        margin-top: 20px;
+      }
+      .btn-outline-danger,
+      .btn-outline-success {
+        margin-right: 5px;
+      }
+      .row {
+        margin-bottom: 15px;
+        border: 1px solid #343a40;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #212529;
+      }
+      .btn {
+        color: #fff;
+      }
+      .btn-outline-danger:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+      }
+      .btn-outline-success:hover {
+        background-color: #28a745;
+        border-color: #28a745;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/rooms">Zzz</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNavAltMarkup"
+          aria-controls="navbarNavAltMarkup"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-link active" aria-current="page" href="/"
+              >Strona główna</a
+            >
+            <a class="nav-link" href="/profile">Profil</a>
+            <a class="nav-link" href="/friends">Znajomi</a>
+            <a class="nav-link" href="/logout">Wyloguj się</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container container-lg">
+      {% if not friendListRequest %}
+      <div class="row align-items-start">
+        <div class="col-12 col-md-9">
+          <p class="mb-0">Brak zaproszeń do grona znajomych</p>
+        </div>
+      </div>
+      <!-- SEKCJA GDZIE ON ZOSTAJE ZAPROSZONY -->
+      {% endif %} {% for mayby_friend in friendListRequest %} {% if
+      mayby_friend.friend1Username != user.username %}
+      <div class="row align-items-start">
+        <div class="col-12 col-md-9">
+          <p class="mb-0">
+            {{ mayby_friend.friend1Username }} zaprasza cię do grona znajomych
+          </p>
+        </div>
+        <div class="col-12 col-md-3 text-md-end text-start mt-2 mt-md-0">
+          <button
+            type="button"
+            class="btn btn-outline-danger reject"
+            id="{{ mayby_friend.friend1Username }}"
+          >
+            Odrzuć
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-success accept"
+            id="{{ mayby_friend.friend1Username }}"
+          >
+            Zaakceptuj
+          </button>
+        </div>
+      </div>
+      {% endif %} {% endfor %}
+      <!-- SEKCJA GDZIE TY KOGOS ZAPROSILES I MOZESZ WYCOFAC ZAPROSZENIE -->
+      {% for mayby_friend in friendListRequest %} {% if
+      mayby_friend.friend1Username == user.username %}
+      <div class="row align-items-start">
+        <div class="col-12 col-md-9">
+          <p class="mb-0">
+            Zaproszenie do znajomych {{ mayby_friend.friend2Username }} oczekuje
+            na rozpatrzenie
+          </p>
+        </div>
+        <div class="col-12 col-md-3 text-md-end text-start mt-2 mt-md-0">
+          <button
+            type="button"
+            class="btn btn-outline-secondary cancel"
+            id="{{ mayby_friend.friend2Username }}"
+          >
+            Anuluj
+          </button>
+        </div>
+      </div>
+      {% endif %} {% endfor %}
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Pobierz wszystkie przyciski akceptacji, odrzucenia i anulowania
+        const buttons = document.querySelectorAll("button");
+
+        buttons.forEach((button) => {
+          button.addEventListener("click", async (event) => {
+            const id = button.getAttribute("id");
+            let decision;
+
+            // Określ wartość na podstawie klasy
+            if (button.classList.contains("accept")) {
+              decision = 1;
+            } else if (button.classList.contains("reject")) {
+              decision = 0;
+            } else if (button.classList.contains("cancel")) {
+              decision = 0;
+            } else {
+              console.log("Nieznana akcja");
+              return;
+            }
+            await fetch("/friends", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                decision: decision,
+                user2: id,
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log("Odpowiedź serwera:", data);
+                if (data[0] == true) {
+                  console.log("nowy koliga");
+                } else if (data[0] == false) {
+                  console.log("Ni ma koligi");
+                }
+              })
+              .catch((error) => {
+                console.log("Błąd podczas wysyłania:", error);
+              });
+          });
+        });
+      });
+    </script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

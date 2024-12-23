@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import aliased
-from sqlalchemy import func
+from sqlalchemy import func, case
 
 db = SQLAlchemy()
 
@@ -110,10 +110,31 @@ def search_friend(user):
     user2_alias = aliased(User)  # Alias dla user2
     friends = (Friend.query.join(user1_alias,Friend.friendUser1 == user1_alias.userID)
             .join(user2_alias,Friend.friendUser2 == user2_alias.userID)
-            .filter(((Friend.friendUser1 == user.userID) | (Friend.friendUser2 == user.userID)) & Friend.friendStatus == 1)
+            .filter(((Friend.friendUser1 == user.userID) | (Friend.friendUser2 == user.userID)) & (Friend.friendStatus == 1))
+            .with_entities(user1_alias.username.label('friend1Username'),user2_alias.username.label('friend2Username'),
+                            Friend.timeFriend,Friend.friendID,Friend.friendStatus)).all()
+
+    return friends
+
+def search_friend_request(user):
+    user1_alias = aliased(User)  # Alias dla user1
+    user2_alias = aliased(User)  # Alias dla user2
+    friends = (Friend.query.join(user1_alias,Friend.friendUser1 == user1_alias.userID)
+            .join(user2_alias,Friend.friendUser2 == user2_alias.userID)
+            .filter(((Friend.friendUser1 == user.userID) | (Friend.friendUser2 == user.userID)) & (Friend.friendStatus == 2))
             .with_entities(user1_alias.username.label('friend1Username'),user2_alias.username.label('friend2Username'),
                             Friend.timeFriend,Friend.friendID,Friend.friendStatus)).all()
     return friends
+
+
+def friends_accept_reject(user,user2,decision: int):
+    # 0-Nie 1-Tak 2-Oczekiwanie
+    try:
+        conclusion = Friend.query.filter(((Friend.friendUser1==user.userID) & (Friend.friendUser2==user2.userID)) | ((Friend.friendUser1==user2.userID) & (Friend.friendUser2==user.userID))).update({"friendStatus": decision})
+        db.session.commit()
+        return True
+    except Exception as e:
+        return False
 
 # .add_column(user1_alias.username.label('userFollow'),
 #             user2_alias.username.label('follower'),

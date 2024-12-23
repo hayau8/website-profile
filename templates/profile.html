@@ -53,8 +53,11 @@
           Utworzono:
           <span id="creation-time" class="dark">{{ timeCreateProfil }}</span>
         </p>
+        {% if username != youUsername %}
+          
         <button type="button" class="btn btn-info" id="addFollow">{{ canIfollow }}</button>
         <button type="button" class="btn btn-info" id="addFriend">{{ canIMakeFriend }}</button>
+        {% endif %}
       </div>
       
 
@@ -86,7 +89,8 @@
                     <ul class="list-group" id="friends-list">
                       {% for friend in friendList%}
                       {% if friend.friendStatus == 1 %}
-                      <li class="list-group-item bg-dark text-white">{{ friend.friend1Username if youUsername != friend.friend1Username else friend.friend2Username}}</li>
+                      <li class="list-group-item bg-dark text-white">{{ friend.friend1Username if youUsername != friend.friend2Username else friend.friend2Username }}
+                      </li>
                       {% endif %}
                       {% endfor %}
                     </ul>
@@ -145,25 +149,12 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <!-- 
-      // Dane dla przykładu - zostaną pobrane z bazy danych w wersji dynamicznej
-      const userData = {
-        username: "Jan Kowalski",
-        likes: 123,
-        creationTime: "2023-01-01",
-        comments: [
-          { user: "Anna", text: "Świetny profil!" },
-          { user: "Marek", text: "Dzięki za pomoc!" },
-        ],
-        friends: ["Anna", "Marek", "Kasia"],
-        likedProfiles: ["Kamil", "Alicja", "Piotr"],
-      };
-    -->
-
+        
     <script>
+      const you_username = String("{{ youUsername }}")
+      {% if username != youUsername %}
       // POLUBIENIA
       const button_follow = document.getElementById('addFollow');
-      const you_username = String("{{ youUsername }}")
       button_follow.addEventListener('click',async ()=>{
         await fetch("/follow", {
   method: "POST",
@@ -207,7 +198,7 @@
         }
         ).catch(err => console.error('Error:', err));
     });
-
+    {% endif %}
 
 
     // KOMENTARZE
@@ -218,7 +209,7 @@
         const userStrong = document.createElement("strong");
         userStrong.textContent = `${username}:`;
 
-        const commentTextNode = document.createTextNode(` "${commentText}"`);
+        const commentTextNode = document.createTextNode(` ${commentText}`);
         commentDiv.appendChild(userStrong);
         commentDiv.appendChild(commentTextNode);
 
