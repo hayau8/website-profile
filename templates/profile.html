@@ -34,6 +34,7 @@
               >Strona główna</a
             >
             <a class="nav-link" href="/profile">Profil</a>
+            <a class="nav-link" href="/friends">Znajomi</a>
             <a class="nav-link" href="/logout">Wyloguj się</a>
           </div>
         </div>
@@ -86,14 +87,16 @@
                     <h5>Lista Znajomych</h5>
                 </div>
                 <div class="card-body">
-                    <ul class="list-group" id="friends-list">
-                      {% for friend in friendList%}
-                      {% if friend.friendStatus == 1 %}
-                      <li class="list-group-item bg-dark text-white">{{ friend.friend1Username if youUsername != friend.friend2Username else friend.friend2Username }}
-                      </li>
-                      {% endif %}
-                      {% endfor %}
-                    </ul>
+                  <ul class="list-group" id="friends-list">
+                    {% for friend in friendList %}
+                        {% if friend.friendStatus == 1 %}
+                            {% set friendName = friend.friend1Username if youUsername != friend.friend1Username and friend.friend1Username != username else friend.friend2Username %}
+                            <a href="{{ url_for('profile', profilName=friendName) }} " class="text-decoration-none">
+                                <li class="list-group-item bg-dark text-white">{{ friendName }}</li>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
                 </div>
             </div>
         </div>
@@ -107,7 +110,8 @@
                 <div class="card-body">
                     <ul class="list-group" id="liked-profiles">
                        {% for follow in followList %} 
-                      <li class="list-group-item bg-dark text-white">{{follow.follower}}</li>
+                       {% set followerName = follow.follower%}
+                       <a href="{{ url_for('profile', profilName=followerName) }} " class="text-decoration-none"><li class="list-group-item bg-dark text-white">{{followerName}}</li></a>
                         {% endfor %}
                     </ul>
                 </div>
@@ -194,7 +198,7 @@
           } else if (data[0]=="2"){
             button_add_friend.innerHTML="Oczekujący na akceptacje"
           }
-          console.log(data);
+          // console.log(data);
         }
         ).catch(err => console.error('Error:', err));
     });
@@ -248,7 +252,7 @@
       if (data[0]==true){
         addCommentBlock(String(you_username),String(commentInput.value));
         commentInput.value='';
-        console.log("UDAŁO SIĘ!!!!!")
+        // console.log("UDAŁO SIĘ!!!!!")
       } else if (data[0]==false){
         console.log("ojej coś nie tak");
       }

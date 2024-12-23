@@ -4,13 +4,25 @@ from datetime import timedelta
 from databaseFunction import (User, Room, Message,Friend,Follow,CommentProfile, db, search_user_table,
                               save_message, fetch_messages_for_room, create_room, fetch_rooms,
                               search_friend, search_follow, count_follow, count_followers,search_comment,search_friend_request,
-                              friends_accept_reject,)
+                              friends_accept_reject,create_log)
 from sqlalchemy.orm import aliased
+import logging
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 app.permanent_session_lifetime = timedelta(days=7)
 socketio = SocketIO(app)
+
+# Konfiguracja logging (logi)
+logging.basicConfig(
+    level=logging.DEBUG,  # Określa poziom logowania (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Format logów
+    handlers=[
+        logging.FileHandler('logs/app.log'),  # Logi zapisywane w pliku app.log w folderze logs
+        logging.StreamHandler()  # Logi także wyświetlane na konsoli
+    ]
+)
+
 
 # Konfiguracja SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat_app2.db'
@@ -158,9 +170,8 @@ def profile(profilName=None):
     commentList = search_comment(user)
     canIfollow = "Polubiony" if Follow.query.filter_by(userFollow=user.userID, follower=user2.userID).first() else "Polub"
     # sekcja z sprawdzaniem czy przyjaciel / oczekujacy / nieznajomy
-    request_friend = Friend.query.with_entities(Friend.friendStatus).filter(((Friend.friendUser1 == user.userID) & (Friend.friendUser2== user.userID)) | ((Friend.friendUser1==user2.userID) & (Friend.friendUser2==user.userID))).first()
+    request_friend = Friend.query.with_entities(Friend.friendStatus).filter(((Friend.friendUser1 == user.userID) & (Friend.friendUser2== user2.userID)) | ((Friend.friendUser1==user2.userID) & (Friend.friendUser2==user.userID))).first()
     if request_friend:
-        print(request_friend.friendStatus)
         if request_friend.friendStatus == 0:
             canIMakeFriend = "Dodaj do znajomych"
         elif request_friend.friendStatus == 1:
@@ -193,25 +204,21 @@ def add_friend():
     whoSend = search_user_table(data.get('whoSend'))
     whoToSend = search_user_table(data.get("whoToSend"))
     check_friend = Friend.query.with_entities(Friend.friendStatus).filter(((Friend.friendUser1 == whoSend.userID) & (Friend.friendUser2 == whoToSend.userID)) | (
-                (Friend.friendUser1 == whoToSend.userID) & (Friend.friendUser2 == whoSend.userID))).first()
-    if check_friend:
-        if check_friend.friendStatus == 0: # wyslanie zaproszenia
-            Friend.query.filter(((Friend.friendUser1 == whoSend.userID) & (Friend.friendUser2 == whoToSend.userID)) | (
-                    (Friend.friendUser1 == whoToSend.userID) & (Friend.friendUser2 == whoSend.userID))).update({Friend.friendStatus:2})
-            db.session.commit()
-            return jsonify(["2","ZAPROSIŁEM CIE ZAAKCEPTUJ"])
-        elif check_friend.friendStatus == 1: # usuniecie z znajomych
-            Friend.query.filter(((Friend.friendUser1 == whoSend.userID) & (Friend.friendUser2 == whoToSend.userID)) | (
-                    (Friend.friendUser1 == whoToSend.userID) & (Friend.friendUser2 == whoSend.userID))).update({Friend.friendStatus:0})
-            db.session.commit()
-            return jsonify(["0","Usunałem cię :/"])
-        elif check_friend.friendStatus == 2: # wycofanie zaproszenia
-            # ask_friend = Friend(friendUser1=whoSend.userID, friendUser2=whoToSend.userID, friendStatus=0)
-            # db.session.add(ask_friend)
-            Friend.query.filter(((Friend.friendUser1 == whoSend.userID) & (Friend.friendUser2 == whoToSend.userID)) | (
-                    (Friend.friendUser1 == whoToSend.userID) & (Friend.friendUser2 == whoSend.userID))).update({Friend.friendStatus:0})
-            db.session.commit()
-            return jsonify(["0","Zmieniłem zdanie, nie chce przyjaciół"])
+            (Friend.friendUser1 == whoToSend.userID) & (Friend.friendUser2 == whoSend.userID))).first()
+    if check_friend.friendStatus == 0: # wyslanie zaproszenia
+        answer = friends_accept_reject(whoSend, whoToSend, 2)
+        return jsonify(["2","ZAPROSIŁEM CIE ZAAKCEPTUJ"])
+    elif check_friend.friendStatus == 1: # usuniecie z znajomych
+        answer = friends_accept_reject(whoSend, whoToSend, 0)
+        return jsonify(["0","Usunałem cię :/"])
+    elif  check_friend.friendStatus == 2: # wycofanie zaproszenia
+        query = (Friend.query.with_entities(Friend.friendStatus, Friend.friendUser1, Friend.friendUser2).filter(
+            (Friend.friendUser1 == whoToSend.userID) & (Friend.friendUser2 == whoSend.userID)).first()).friendStatus == 2
+        if query: # wysyłanie zapytania czy osoba zapraszana nie wyslala juz zaproszenia, jezeli tak to dodaje do znajomych (akceptacja)
+            answer = friends_accept_reject(whoSend, whoToSend, 1)
+            return jsonify(["1","Nowy koliga"])
+        answer = friends_accept_reject(whoSend, whoToSend, 0)
+        return jsonify(["0","Zmieniłem zdanie, nie chce przyjaciół"])
     else:
         ask_friend = Friend(friendUser1=whoSend.userID, friendUser2=whoToSend.userID, friendStatus=2)
         db.session.add(ask_friend)
@@ -247,7 +254,6 @@ def friends():
         data = request.get_json()
         user2 = search_user_table(data.get("user2"))
         decision = int(data.get("decision"))
-        print(decision)
         odpowiedz = friends_accept_reject(user,user2,decision)
         if odpowiedz == False:
             return jsonify([False],"Bład w zapytaniu")
